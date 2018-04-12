@@ -1,0 +1,45 @@
+<html>
+<title>NODE APP</title>
+<body align = "center">
+  <h2>Node Socket Menu</h2>
+  <input type="button" value="Connect" onclick="connect()">
+  <input type="button" value="Disconnect" onclick="disconnect()">
+  <br /><br />
+  <input type="text" placeholder="Message" id="msg">
+  <input type="button" value="Send" onclick="send()">
+  <br />
+  <a href="/" style="color:gray">Home</a>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="https://cdn.socket.io/socket.io-1.5.0.js"></script>
+
+  <script>
+    var socket;
+    var connected = false;
+
+    function connect(){
+      if (!connected){
+        socket = io.connect("http://localhost:5000/Alerter");
+
+        socket.on("msg",function(data){
+          alert(data);
+        })
+
+        connected = !connected;
+      } else {
+        alert("Disconnect First");
+      }
+    }
+
+    function disconnect(){
+      location.reload();
+      connected = !connected;
+    }
+
+    function send(){
+      if (!connected) {alert("You Are Not Connected!"); return;}
+      var text = document.getElementById("msg");
+      socket.emit("msg",text.value);
+    }
+  </script>
+</body>
+</html>
