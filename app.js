@@ -7,14 +7,14 @@ var users = [];
 var connections = [];
 
 app.get('/Alerter/', function (req, res) {
-  res.sendfile(__dirname + '/static/Alerter.html');
+  res.sendFile(__dirname + '/static/Alerter.html');
 });
 
 var server = app.listen(process.env.PORT || 5000, function () {
   console.log('Example app listening on port 5000!');
 });
 
-var io = socket(server);
+var io = socket.listen(server);
 
 io.of("/Alerter").on("connection", function(socket){
   connections.push(socket);
