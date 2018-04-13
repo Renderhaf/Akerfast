@@ -18,7 +18,8 @@
 
     function connect(){
       if (!connected){
-        socket = io.connect("http://localhost:5000/Alerter");
+        var host = location.origin + "/Alerter";
+        socket = io.connect(host);
 
         socket.on("msg",function(data){
           alert(data);
