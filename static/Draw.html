@@ -22,6 +22,8 @@
       for (var i = 0; i < data.length; i ++){
         strokeDrawer(data[i]);
       }
+      lineChange()
+      cchange()
     });
     socket.emit("start",[]);
 
