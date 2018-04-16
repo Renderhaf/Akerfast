@@ -1,0 +1,103 @@
+<html>
+<title>Multiplayer Draw</title>
+<body align="center">
+  <canvas id="myCan" style="border:1px solid #000000;" align="center"></canvas></br>
+  <input type="range" min="1" max="10" onchange="lineChange()" id="linewidth" value="1">
+  <input type="color" value="#000000" id="colorpicker" onchange="cchange()">
+  <script src="https://cdn.socket.io/socket.io-1.5.0.js"></script>
+  <script>
+    // connect to Socket
+    var socket;
+    var host = location.origin + "/Draw";
+    socket = io.connect(host);
+    //stroke get event
+    socket.on("newstroke",function(data){
+        // if (data[2] == currentID) {console.log("Recived Self Emit. Returning...");return;} // check if its not your own drawing
+
+        console.log("Recived Stroke From Server. Id = " + data[2]);
+        x.strokeStyle = data[0][0];
+        x.lineWidth = data[0][1];
+        var strokedata = data[1];
+
+        x.beginPath();
+        x.moveTo(strokedata[1][0][0],strokedata[1][0][1]);
+        for (var i = 1 ; i < data[1].length; i++){
+          x.lineTo(strokedata[i][0],strokedata[i][1],1,1);
+        }
+        x.stroke();
+    })
+
+    var stroke = [];
+
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+
+    var c = document.getElementById("myCan");
+    var x = c.getContext("2d");
+
+    c.width = w-20;
+    c.height = h-50;
+
+    var currentID = 0;
+    //set base events
+    c.addEventListener("mousedown", mouseD);
+    c.addEventListener("mouseup", mouseR);
+    c.addEventListener("mouseout", mouseR);
+
+    //helper function
+    function getMousePos(canvas, evt) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+
+    //finish stroke
+    function mouseR(){
+      c.removeEventListener("mousemove", mouseM);
+      //send stroke
+      if (stroke.length != 0){
+        currentID = parseInt(Math.random()*10000);
+        var s = [[x.strokeStyle,x.lineWidth],stroke,currentID]; // style, data, ID
+        socket.emit("newstroke",s)
+        stroke = []
+        console.log("Sent Stroke");
+      }
+    }
+
+    //continue stroke
+    function mouseM (e){
+        var mouse = getMousePos(c, e);
+        // x.fillStyle = "Black";
+
+        if (stroke.length == 0) {stroke.push([mouse["x"],mouse["y"]])}; // Lines
+
+        x.beginPath();
+
+        var l = stroke.length -1;
+        x.moveTo(stroke[l][0],stroke[l][1]);
+
+        stroke.push([mouse["x"],mouse["y"]]);
+        x.lineTo(stroke[l+1][0],stroke[l+1][1],1,1);
+
+        x.stroke();
+    }
+
+    //mousedown event
+    function mouseD (e){
+      c.addEventListener("mousemove", mouseM);
+    }
+
+    function lineChange(){
+      var lr = document.getElementById("linewidth");
+      x.lineWidth=parseInt(lr.value);
+    }
+
+    function cchange(){
+      var cp = document.getElementById("colorpicker");
+      x.strokeStyle = cp.value;
+    }
+  </script>
+</body>
+</html>
