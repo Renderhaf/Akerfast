@@ -12,20 +12,31 @@
     socket = io.connect(host);
     //stroke get event
     socket.on("newstroke",function(data){
-        // if (data[2] == currentID) {console.log("Recived Self Emit. Returning...");return;} // check if its not your own drawing
-
-        console.log("Recived Stroke From Server. Id = " + data[2]);
-        x.strokeStyle = data[0][0];
-        x.lineWidth = data[0][1];
-        var strokedata = data[1];
-
-        x.beginPath();
-        x.moveTo(strokedata[1][0][0],strokedata[1][0][1]);
-        for (var i = 1 ; i < data[1].length; i++){
-          x.lineTo(strokedata[i][0],strokedata[i][1],1,1);
-        }
-        x.stroke();
+      if (data[2] == currentID) {console.log("Recived Self Emit. Returning...");return;} // check if its not your own drawing
+      console.log("Recived Stroke From Server. Id = " + data[2]);
+      strokeDrawer(data);
     })
+
+    socket.on("start",function(data){
+      console.log("Drawing Strokes");
+      for (var i = 0; i < data.length; i ++){
+        strokeDrawer(data[i]);
+      }
+    });
+    socket.emit("start",[]);
+
+    function strokeDrawer(data){
+      x.strokeStyle = data[0][0];
+      x.lineWidth = data[0][1];
+      var strokedata = data[1];
+
+      x.beginPath();
+      x.moveTo(strokedata[1][0][0],strokedata[1][0][1]);
+      for (var i = 1 ; i < data[1].length; i++){
+        x.lineTo(strokedata[i][0],strokedata[i][1],1,1);
+      }
+      x.stroke();
+    }
 
     var stroke = [];
 

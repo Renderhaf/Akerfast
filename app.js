@@ -3,8 +3,6 @@ var socket = require("socket.io");
 var app = express();
 app.use(express.static(__dirname + '/static'));
 
-var users = [];
-
 //web gateways
 app.get('/Alerter/', function (req, res) {
   res.sendFile(__dirname + '/static/Alerter.html');
@@ -26,15 +24,22 @@ io.of("/Alerter").on("connection", function(socket){
     console.log("Emmited " + data);
   })
 });
+
+strokes = []
 io.of("/Draw").on("connection", function(socket){
   console.log("New Connection To Draw");
 
   socket.on("newstroke", function(data){
-    console.log(data);
+    // console.log(data);
     if (data[1].length != 0){
+      strokes.push(data);
       io.of("/Draw").emit("newstroke",data);
       console.log("Emmited to draw");
     }
+  })
+
+  socket.on("start",function(data){
+    socket.emit("start", strokes);
   })
   socket.on("disconnect",function(){
     console.log("Disconnected");
